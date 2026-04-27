@@ -1,64 +1,80 @@
 import java.util.ArrayList;
 import java.util.List;
- 
+
+/**
+ * Fábrica que produce exactamente 50 cartas:
+ *   30 monstruos, 10 mágicas, 10 trampas.
+ */
 public class FabricaDeCartas {
 
-
-    //Une los monstruos y las magicas en una sola lista de tipo 'Carta'.
     public static List<Carta> crearMazoCompleto() {
         List<Carta> mazo = new ArrayList<>();
-        mazo.addAll(crearMonstruos());// Ejecuta el metodo crearMonstruos() y añade todos los resultados al mazo
-        mazo.addAll(crearMagicas());// Ejecuta el metodo crearMagicas() y añade todos los resultados al mazo
-        return mazo;
+        mazo.addAll(crearMonstruos());  // 30
+        mazo.addAll(crearMagicas());    // 10
+        mazo.addAll(crearTrampas());    // 10
+        return mazo;                    // total = 50
     }
-    //Se encarga de fabricar las cartas de tipo Monstruo.
+
+    /** 30 cartas monstruo */
     public static List<CartaMonstruo> crearMonstruos() {
-        List<CartaMonstruo> monstruos = new ArrayList<>();
-        
-        // Bucle que se repite 5 veces para crear cada carta 5 veces
-        for (int i = 0; i < 5; i++) {
-            monstruos.add(new CartaMonstruo("Guerrero De La Luz",  (byte) 3,  (short) 1200, (short) 1000));
-            monstruos.add(new CartaMonstruo("Bestia del Bosque",   (byte) 4,  (short) 1500, (short) 1200));
-            monstruos.add(new CartaMonstruo("Guardian del Hierro", (byte) 5,  (short) 1000, (short) 2000));
-            monstruos.add(new CartaMonstruo("Hechicero del Caos",  (byte) 4,  (short) 1800, (short) 1500));
-        }
+        List<CartaMonstruo> lista = new ArrayList<>();
 
-        // Bucle para añadir 6 copias de "Caballero Real"
-        for (int i = 0; i < 6; i++) {
-            monstruos.add(new CartaMonstruo("Caballero Real",      (byte) 6,  (short) 2300, (short) 2000));
-        }
+        // 6 × Guerrero De La Luz (nivel 3)
+        for (int i = 0; i < 6; i++)
+            lista.add(new CartaMonstruo("Guerrero De La Luz",  (byte) 3, (short) 1200, (short) 1000));
 
-        // Bucle para añadir 4 copias de "Dragon Ancestral"
-        for (int i = 0; i < 4; i++) {
-            monstruos.add(new CartaMonstruo("Dragon Ancestral",    (byte) 8,  (short) 3000, (short) 2500));
-        }
- 
-        return monstruos;
+        // 6 × Bestia del Bosque (nivel 4)
+        for (int i = 0; i < 6; i++)
+            lista.add(new CartaMonstruo("Bestia del Bosque",   (byte) 4, (short) 1500, (short) 1200));
+
+        // 5 × Guardián del Hierro (nivel 5 — requiere sacrificio)
+        for (int i = 0; i < 5; i++)
+            lista.add(new CartaMonstruo("Guardian del Hierro", (byte) 5, (short) 1000, (short) 2000));
+
+        // 5 × Hechicero del Caos (nivel 4)
+        for (int i = 0; i < 5; i++)
+            lista.add(new CartaMonstruo("Hechicero del Caos",  (byte) 4, (short) 1800, (short) 1500));
+
+        // 5 × Caballero Real (nivel 6 — requiere sacrificio)
+        for (int i = 0; i < 5; i++)
+            lista.add(new CartaMonstruo("Caballero Real",      (byte) 6, (short) 2300, (short) 2000));
+
+        // 3 × Dragón Ancestral (nivel 8 — requiere sacrificio)
+        for (int i = 0; i < 3; i++)
+            lista.add(new CartaMonstruo("Dragon Ancestral",    (byte) 8, (short) 3000, (short) 2500));
+
+        return lista; // 6+6+5+5+5+3 = 30
     }
- 
-    //Se encarga de fabricar las cartas magicas, aqui aparece que cada carta es una clase propia.
-    public static List<CartaMagica> crearMagicas() {
-        List<CartaMagica> magicas = new ArrayList<>();
-        // Añade 2 unidades de la carta "Pot Of Greed"
-        magicas.add(new PotOfGreed());
-        magicas.add(new PotOfGreed());
-        
-        // Añade 2 unidades de "Espada De Zeus"
-        magicas.add(new EspadaDeZeus());
-        magicas.add(new EspadaDeZeus());
- 
-        // Añade 2 unidades de "Escudo De Atenea"
-        magicas.add(new EscudoDeAtenea());
-        magicas.add(new EscudoDeAtenea());
- 
-        // Añade 2 unidades de "Cura Milagrosa"
-        magicas.add(new CuraMilagrosa());
-        magicas.add(new CuraMilagrosa());
 
-        //Añade una sola carta de cada una
-        magicas.add(new Fisura());
-        magicas.add(new LlamadaDelAbismo());
- 
-        return magicas;
+    /** 10 cartas mágicas */
+    public static List<CartaMagica> crearMagicas() {
+        List<CartaMagica> lista = new ArrayList<>();
+        lista.add(new PotOfGreed());
+        lista.add(new PotOfGreed());
+        lista.add(new EspadaDeZeus());
+        lista.add(new EspadaDeZeus());
+        lista.add(new EscudoDeAtenea());
+        lista.add(new EscudoDeAtenea());
+        lista.add(new CuraMilagrosa());
+        lista.add(new CuraMilagrosa());
+        lista.add(new Fisura());
+        lista.add(new LlamadaDelAbismo());
+        return lista; // 10
+    }
+
+    /** 10 cartas trampa */
+    public static List<CartaTrampa> crearTrampas() {
+        List<CartaTrampa> lista = new ArrayList<>();
+        lista.add(new ContraAtaque());
+        lista.add(new ContraAtaque());
+        lista.add(new CampoMinado());
+        lista.add(new ReflejoMagico());
+        lista.add(new ReflejoMagico());
+        lista.add(new RenacerDelFenix());
+        lista.add(new TormentaDeTruenos());
+        lista.add(new DestinoInexorable());
+        lista.add(new BoltDivino());
+        lista.add(new RoboForzado());
+        return lista; // 10
     }
 }

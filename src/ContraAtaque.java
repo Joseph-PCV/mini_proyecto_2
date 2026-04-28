@@ -1,7 +1,8 @@
 /**
  * Trampa: Contra-Ataque
- * Se activa cuando el oponente ataca. Niega el ataque y destruye al monstruo atacante.
- * Condición: el oponente tiene al menos un monstruo en campo.
+ * Se activa DURANTE el ataque del oponente, antes de resolver el combate.
+ * Niega el ataque y destruye al monstruo atacante.
+ * Condición: debe haber un monstruo atacante declarado (ctx.getMonstruoAtacante() != null).
  */
 public class ContraAtaque extends CartaTrampa {
 
@@ -11,18 +12,18 @@ public class ContraAtaque extends CartaTrampa {
 
     @Override
     public boolean puedoActivarme(Contexto ctx) {
-        // Se puede usar si el oponente tiene monstruos en campo (hay un ataque en curso)
-        return !ctx.getOponente().getCampo().isEmpty();
+        // Solo se puede activar si hay un ataque declarado en este momento
+        return ctx.getMonstruoAtacante() != null;
     }
 
     @Override
     public void activar(Contexto ctx) {
-        Jugador oponente = ctx.getOponente();
-        if (oponente.getCampo().isEmpty()) {
-            return;
-        }
-        // Destruye el primer monstruo del oponente (el atacante)
-        CartaMonstruo atacante = oponente.getCampo().get(0);
-        ctx.getCampo().eliminarMonstruo(atacante, oponente);
+        CartaMonstruo atacante = ctx.getMonstruoAtacante();
+        if (atacante == null) return;
+
+        // En el contexto de defensa: getOponente() es el jugador atacante
+        // (los roles están invertidos: Contexto(defensor, atacante, campo))
+        Jugador jugadorAtacante = ctx.getOponente();
+        ctx.getCampo().eliminarMonstruo(atacante, jugadorAtacante);
     }
 }

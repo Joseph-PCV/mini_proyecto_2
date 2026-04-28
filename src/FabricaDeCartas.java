@@ -65,16 +65,15 @@ public class FabricaDeCartas {
     /** 10 cartas trampa */
     public static List<CartaTrampa> crearTrampas() {
         List<CartaTrampa> lista = new ArrayList<>();
-        lista.add(new ContraAtaque());
-        lista.add(new ContraAtaque());
-        lista.add(new CampoMinado());
-        lista.add(new ReflejoMagico());
-        lista.add(new ReflejoMagico());
-        lista.add(new RenacerDelFenix());
-        lista.add(new TormentaDeTruenos());
-        lista.add(new DestinoInexorable());
-        lista.add(new BoltDivino());
-        lista.add(new RoboForzado());
+        lista.add(new ContraAtaque());      // 1
+        lista.add(new CampoMinado());       // 2
+        lista.add(new ReflejoMagico());     // 3
+        lista.add(new RenacerDelFenix());   // 4
+        lista.add(new TormentaDeTruenos()); // 5
+        lista.add(new DestinoInexorable()); // 6
+        lista.add(new BoltDivino());        // 7
+        lista.add(new RoboForzado());       // 8
+        lista.add(new EscudoSagrado());     // 9  ← Solucion
+        lista.add(new EspejoDeAlmas());     // 10 ← Solucion
         return lista; // 10
-    }
 }

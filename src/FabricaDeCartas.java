@@ -76,4 +76,5 @@ public class FabricaDeCartas {
         lista.add(new EscudoSagrado());     // 9  ← Solucion
         lista.add(new EspejoDeAlmas());     // 10 ← Solucion
         return lista; // 10
+    }
 }

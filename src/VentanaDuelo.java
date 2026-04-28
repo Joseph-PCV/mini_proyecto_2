@@ -445,7 +445,7 @@ public class VentanaDuelo extends JFrame {
         if (disponibles.isEmpty()) { agregarLog("Ningún monstruo puede atacar."); return; }
         if (activo.isYaAtacoEsteTurno()) { agregarLog("Ya atacaste este turno."); return; }
 
-        // Elegir atacante
+        // ── 1. Elegir atacante ────────────────────────────────────────────────
         String[] opAtacantes = new String[disponibles.size() + 1];
         for (int i = 0; i < disponibles.size(); i++) opAtacantes[i] = (i + 1) + ". " + disponibles.get(i);
         opAtacantes[disponibles.size()] = "Cancelar";
@@ -460,13 +460,10 @@ public class VentanaDuelo extends JFrame {
         if (idxAtac < 0 || idxAtac >= disponibles.size()) return;
         CartaMonstruo atacante = disponibles.get(idxAtac);
 
-        String logCombate;
+        // ── 2. Elegir defensor (si hay monstruos en campo rival) ──────────────
+        CartaMonstruo defensor = null;
 
-        if (oponente.getCampo().isEmpty()) {
-            // Ataque directo
-            logCombate = campo.ataqueDirecto(atacante, oponente);
-        } else {
-            // Elegir defensor
+        if (!oponente.getCampo().isEmpty()) {
             List<CartaMonstruo> defensores = oponente.getCampo();
             String[] opDefensores = new String[defensores.size() + 1];
             for (int i = 0; i < defensores.size(); i++) opDefensores[i] = (i + 1) + ". " + defensores.get(i);
@@ -480,15 +477,115 @@ public class VentanaDuelo extends JFrame {
 
             int idxDef = java.util.Arrays.asList(opDefensores).indexOf(elegidoDef);
             if (idxDef < 0 || idxDef >= defensores.size()) return;
-            CartaMonstruo defensor = defensores.get(idxDef);
+            defensor = defensores.get(idxDef);
+        }
 
+        // ── 3. FASE DE RESPUESTA: el defensor puede activar trampas ──────────
+        //
+        // Se construye el contexto CON ROLES INVERTIDOS:
+        //   ctx.getJugadorActivo() = oponente (dueño de las trampas)
+        //   ctx.getOponente()      = activo   (el atacante)
+        //
+        // Esto hace que toda la lógica existente en las cartas trampa funcione
+        // correctamente sin modificar ninguna otra clase.
+        //
+        Contexto ctxDefensa = new Contexto(oponente, activo, campo);
+        ctxDefensa.setMonstruoAtacante(atacante);
+
+        if (oponente.hayTrampaActivable(ctxDefensa)) {
+            boolean activoTrampa = ofrecerRespuestaTrampas(oponente, ctxDefensa);
+
+            if (activoTrampa) {
+                verificarGanador();
+                if (campo.hayGanador()) { actualizarUI(); return; }
+
+                // ¿El atacante fue destruido por la trampa?
+                if (!activo.getCampo().contains(atacante)) {
+                    agregarLog("⚡ ¡" + atacante.getNombre() + " fue destruido! El ataque queda cancelado.");
+                    activo.setYaAtacoEsteTurno(true);
+                    actualizarUI();
+                    return;
+                }
+            }
+        }
+
+        // ── 4. Resolver combate ───────────────────────────────────────────────
+        String logCombate;
+
+        if (oponente.getCampo().isEmpty()) {
+            // Ataque directo (campo rival vacío desde el inicio o vaciado por trampa)
+            logCombate = campo.ataqueDirecto(atacante, oponente);
+
+        } else if (defensor != null && !oponente.getCampo().contains(defensor)) {
+            // El defensor elegido fue destruido por una trampa → ataque directo
+            agregarLog("El defensor fue destruido por la trampa. ¡Ataque directo!");
+            logCombate = campo.ataqueDirecto(atacante, oponente);
+
+        } else if (defensor != null) {
+            // Combate normal contra el defensor elegido
             logCombate = campo.resolverCombate(atacante, defensor, activo, oponente);
+
+        } else {
+            // Fallback: ataque directo
+            logCombate = campo.ataqueDirecto(atacante, oponente);
         }
 
         activo.setYaAtacoEsteTurno(true);
         agregarLog(logCombate);
         verificarGanador();
         actualizarUI();
+    }
+
+    /**
+     * Muestra al jugador defensor la lista de trampas activables durante un ataque
+     * y le permite elegir una para activar.
+     *
+     * El contexto recibido ya tiene los roles invertidos:
+     *   ctx.getJugadorActivo() = defensor (dueño de las trampas)
+     *   ctx.getOponente()      = atacante
+     *
+     * @return true si se activó alguna trampa, false si el jugador pasó.
+     */
+    private boolean ofrecerRespuestaTrampas(Jugador defensor, Contexto ctx) {
+        List<CartaTrampa> trampas = defensor.getZonaTrampas();
+        List<Integer>     indices = new java.util.ArrayList<>();
+        List<String>      nombres = new java.util.ArrayList<>();
+
+        for (int i = 0; i < trampas.size(); i++) {
+            if (trampas.get(i).puedoActivarme(ctx)) {
+                indices.add(i);
+                nombres.add((indices.size()) + ". " + trampas.get(i).toString());
+            }
+        }
+        nombres.add("⛔ No activar");
+
+        String[] ops = nombres.toArray(new String[0]);
+
+        // Preguntar al defensor — se coloca la opción "No activar" como selección por defecto
+        String elegida = (String) JOptionPane.showInputDialog(
+            this,
+            "⚠  ¡ATAQUE DECLARADO!\n\n" +
+            defensor.getNombre() + ", ¿deseas activar una trampa en respuesta?\n" +
+            "(Si no activas nada, el combate se resuelve normalmente)",
+            "🕳  Respuesta de trampas — " + defensor.getNombre(),
+            JOptionPane.WARNING_MESSAGE, null, ops, ops[ops.length - 1]);
+
+        // Canceló la ventana o eligió "No activar"
+        if (elegida == null || elegida.equals("⛔ No activar")) return false;
+
+        int posLista = nombres.indexOf(elegida);
+        if (posLista < 0 || posLista >= indices.size()) return false;
+
+        int idxReal = indices.get(posLista);
+        CartaTrampa trampa = trampas.get(idxReal);
+
+        agregarLog("🕳 " + defensor.getNombre() + " activó trampa en respuesta: " + trampa.getNombre());
+        boolean ok = defensor.activarTrampa(idxReal, ctx);
+        if (!ok) {
+            agregarLog("La trampa no pudo activarse.");
+            return false;
+        }
+        return true;
     }
 
     private void accionActivarTrampa() {

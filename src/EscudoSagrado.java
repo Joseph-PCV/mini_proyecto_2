@@ -1,8 +1,3 @@
-/**
- * Trampa: Escudo Sagrado
- * Da +1000 DEF a todos los monstruos propios en campo este turno.
- * Condición: el jugador activo tiene monstruos en campo.
- */
 public class EscudoSagrado extends CartaTrampa {
 
     public EscudoSagrado() {
@@ -11,11 +6,13 @@ public class EscudoSagrado extends CartaTrampa {
 
     @Override
     public boolean puedoActivarme(Contexto ctx) {
+        // Solo si yo tengo monstruos en campo
         return !ctx.getJugadorActivo().getCampo().isEmpty();
     }
 
     @Override
     public void activar(Contexto ctx) {
+        // Le aplica +1000 de def a cada monstruo propio
         for (CartaMonstruo m : ctx.getJugadorActivo().getCampo()) {
             m.aplicarBoostDef((short) 1000);
         }

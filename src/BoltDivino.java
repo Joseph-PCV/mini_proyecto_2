@@ -1,10 +1,5 @@
 import java.util.Random;
 
-/**
- * Trampa: Bolt Divino
- * Destruye un monstruo aleatorio del oponente.
- * Condición: el oponente tiene al menos un monstruo en campo.
- */
 public class BoltDivino extends CartaTrampa {
 
     public BoltDivino() {
@@ -19,10 +14,13 @@ public class BoltDivino extends CartaTrampa {
     @Override
     public void activar(Contexto ctx) {
         Jugador oponente = ctx.getOponente();
-        if (oponente.getCampo().isEmpty()) return;
+        if (oponente.getCampo().isEmpty()) return;//Verificacion
+
         Random rnd = new Random();
+        // Escoge un indice al azar entre 0 y el nuemro de monstruos - 1
         int idx = rnd.nextInt(oponente.getCampo().size());
-        CartaMonstruo objetivo = oponente.getCampo().get(idx);
-        ctx.getCampo().eliminarMonstruo(objetivo, oponente);
+
+        CartaMonstruo objetivo = oponente.getCampo().get(idx); // Toma ese monstruo
+        ctx.getCampo().eliminarMonstruo(objetivo, oponente);   // Lo elimina
     }
 }

@@ -1,8 +1,3 @@
-/**
- * Trampa: Renacer del Fénix
- * Otorga al jugador activo 1500 LP extra.
- * Se puede activar en cualquier momento.
- */
 public class RenacerDelFenix extends CartaTrampa {
 
     public RenacerDelFenix() {
@@ -11,12 +6,13 @@ public class RenacerDelFenix extends CartaTrampa {
 
     @Override
     public boolean puedoActivarme(Contexto ctx) {
+        // Solo se puede usar si tu vida esta por debajo de 3000
         return ctx.getJugadorActivo().getLp() < 3000;
     }
 
     @Override
     public void activar(Contexto ctx) {
         Jugador j = ctx.getJugadorActivo();
-        j.setLp(j.getLp() + 1500);
+        j.setLp(j.getLp() + 1500); // Suma 1500 LP a los que ya tienes
     }
 }

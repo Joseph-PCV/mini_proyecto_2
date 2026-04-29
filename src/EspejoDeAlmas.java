@@ -1,8 +1,3 @@
-/**
- * Trampa: Espejo de Almas
- * Copia el ATK del monstruo más fuerte del oponente e inflige ese valor como daño de LP.
- * Condición: el oponente tiene monstruos en campo.
- */
 public class EspejoDeAlmas extends CartaTrampa {
 
     public EspejoDeAlmas() {
@@ -11,19 +6,22 @@ public class EspejoDeAlmas extends CartaTrampa {
 
     @Override
     public boolean puedoActivarme(Contexto ctx) {
+        // Solo funciona si el oponente tiene monstruos
         return !ctx.getOponente().getCampo().isEmpty();
     }
 
     @Override
     public void activar(Contexto ctx) {
         Jugador oponente = ctx.getOponente();
-        if (oponente.getCampo().isEmpty()) return;
+        if (oponente.getCampo().isEmpty()) return; // verificacion por si algo
+
         int maxAtk = 0;
+        // Recorre todos los monstruos del oponente buscando el de mayor ATK
         for (CartaMonstruo m : oponente.getCampo()) {
             if (m.getAtk() > maxAtk) maxAtk = m.getAtk();
         }
-        // inflige la mitad del ATK para no ser demasiado poderosa
-        int danio = maxAtk / 2;
+
+        int danio = maxAtk / 2; // ataca la mitad del ATK (para no ser demasiado poderosa)
         oponente.recibirDanio(danio);
     }
 }

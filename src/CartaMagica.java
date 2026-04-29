@@ -1,6 +1,6 @@
+// clase abstracta para todas las cartas mágicas, implementa Activable para obligar a definir el efecto
 public abstract class CartaMagica extends Carta implements Activable {
     
-   
     private String descripcion;
 
     public CartaMagica(String nombre, String descripcion) {
@@ -8,6 +8,7 @@ public abstract class CartaMagica extends Carta implements Activable {
         this.descripcion = descripcion;
     }
 
+    // cada carta mágica concreta define qué hace al activarse
     @Override
     public abstract void activar(Contexto ctx);
 

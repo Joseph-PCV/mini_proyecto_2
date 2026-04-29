@@ -1,12 +1,13 @@
 public class CartaMonstruo extends Carta {
- 
+
     private byte nivelCarta;
     private short atk;
     private short def;
+    // boostAtk y boostDef guardan el incremento temporal que dan las cartas mágicas
     private short boostAtk;
     private short boostDef;
     private boolean puedeAtacar;
-    private boolean enModoDefensa;   
+    private boolean enModoDefensa;
 
     public CartaMonstruo(String nombre, byte nivelCarta, short atk, short def) {
         super(nombre);
@@ -18,23 +19,25 @@ public class CartaMonstruo extends Carta {
         this.puedeAtacar = false;
         this.enModoDefensa = false;
     }
- 
+
     public int getnivelCarta() {
         return nivelCarta;
     }
- 
+
+    // retorna el ataque real sumando el boost temporal
     public int getAtk() {
         return atk + boostAtk;
     }
- 
+
+    // retorna la defensa real sumando el boost temporal
     public int getDef() {
         return def + boostDef;
     }
- 
+
     public boolean puedeAtacar() {
         return puedeAtacar;
     }
- 
+
     public void setPuedeAtacar(boolean puedeAtacar) {
         this.puedeAtacar = puedeAtacar;
     }
@@ -44,13 +47,12 @@ public class CartaMonstruo extends Carta {
     }
 
     public void cambiarPosicion() {
-        // Si era true (Defensa), pasa a false (Ataque). Si era false, pasa a true.
+        // si era true pasa a false y viceversa
         this.enModoDefensa = !this.enModoDefensa;
-        // Es un "if-else" rapido: si 'enModoDefensa' es true, asigna "DEFENSA", de lo contrario asigna "ATAQUE".
+        // condicional comprimido para imprimir en cual de los dos modos quedo
         String modo = enModoDefensa ? "DEFENSA" : "ATAQUE";
         System.out.println(">>> " + getNombre() + " cambió a modo " + modo + ".");
     }
-
 
     public void aplicarBoostAtk(short incremento) {
         boostAtk = incremento;
@@ -90,10 +92,11 @@ public class CartaMonstruo extends Carta {
 
     @Override
     public String toString() {
-        String modo = enModoDefensa ? "[DEFENSA]" : "[ATAQUE]";
-        return modo + " " + getNombre() 
-            + " | nivel: " + nivelCarta 
-            + " | ATK: " + getAtk() 
-            + " | DEF: " + getDef();
+        // condicional comprimido para mostrar el modo actual de la carta
+        String modo = enModoDefensa ? "[DEF]" : "[ATK]";
+        return modo + " " + getNombre()
+            + " Lv" + nivelCarta
+            + " ATK:" + getAtk()
+            + " DEF:" + getDef();
     }
 }

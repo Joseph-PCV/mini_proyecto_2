@@ -14,26 +14,26 @@ public class Mazo {
         }
     }
 
-    // Mezcla las cartas aleatoriamente
+    // mezcla las cartas aleatoriamente
     public void barajar() {
         Collections.shuffle(cartas); 
         System.out.println("El mazo ha sido barajado.");
     }
 
-    // Saca la primera carta del mazo
+    // saca la primera carta del mazo
     public Carta robar() {
         if (estaVacio()) {
             return null; 
         }
-        return cartas.remove(0); // Quita la de arriba y la entrega
+        return cartas.remove(0); // quita la de arriba y la entrega
     }
 
-    // Revisa si quedan cartas
+    // revisa si quedan cartas
     public boolean estaVacio() {
         return cartas.isEmpty();
     }
 
-    // Cuantas cartas quedan
+    // cuantas cartas quedan
     public int tamano() {
         return cartas.size();
     }
@@ -42,12 +42,12 @@ public class Mazo {
         List<Carta> manoRepartida = new ArrayList<>();
         
         for (int i = 0; i < n; i++) {
-            Carta cartaRobada = this.robar(); // Reutilizamos el método robar() ya quemaneja el remove(0)
+            Carta cartaRobada = this.robar(); // reutiliza el metodo robar() ya que maneja el remove(0)
             
             if (cartaRobada != null) {
                 manoRepartida.add(cartaRobada);
             } else {
-                // Si el mazo se vacía antes de terminar de repartir, dejamos de iterar
+                // si el mazo se vacia antes de terminar de repartir, deja de iterar
                 break; 
             }
         }
@@ -55,12 +55,11 @@ public class Mazo {
         return manoRepartida;
     }
 
-    // Para meter las que vienen de la fabrica
+    // para meter las que vienen de la fabrica
     public void agregarCartas(List<? extends Carta> nuevasCartas) {
         this.cartas.addAll(nuevasCartas);
     }
-    
-    
+
     public List<Carta> getCartas() {
         return new ArrayList<>(cartas);
     }

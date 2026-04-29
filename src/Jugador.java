@@ -6,11 +6,11 @@ public class Jugador {
     private int lp = 8000;
     private boolean yaJugoCartaEsteTurno = false;
     private boolean yaAtacoEsteTurno = false;
-    private boolean bloqueadoProximoTurno = false;   // efecto de trampa DestinoInexorable
+    private boolean bloqueadoProximoTurno = false; // flag que activa DestinoInexorable para bloquear el siguiente turno
     private List<Carta> mano;
     private Mazo mazo;
     private List<CartaMonstruo> campo;
-    private List<CartaTrampa> zonaTrampas; // trampas colocadas boca abajo
+    private List<CartaTrampa> zonaTrampas; // trampas colocadas boca abajo esperando activarse
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -23,8 +23,6 @@ public class Jugador {
         this.yaAtacoEsteTurno = false;
         this.bloqueadoProximoTurno = false;
     }
-
-    // ── Getters / Setters ──────────────────────────────────────────────────────
 
     public String getNombre() { return nombre; }
 
@@ -44,8 +42,6 @@ public class Jugador {
     public void setMazo(Mazo mazo) { this.mazo = mazo; }
 
     public List<CartaTrampa> getZonaTrampas() { return zonaTrampas; }
-
-    // ── Mecánicas básicas ──────────────────────────────────────────────────────
 
     public void robarCarta() {
         if (mazo != null) {
@@ -69,20 +65,16 @@ public class Jugador {
 
     public boolean puedeJugarCarta() { return !yaJugoCartaEsteTurno; }
 
-    // ── Bloqueo de turno (efecto trampa) ─────────────────────────────────────
-
-    /** Llamado por DestinoInexorable: el próximo turno no puede jugar cartas. */
+    // llamado por DestinoInexorable: el proximo turno el jugador no puede jugar cartas
     public void bloquearJugarCartaProximoTurno() {
         bloqueadoProximoTurno = true;
     }
 
     public boolean isBloqueadoProximoTurno() { return bloqueadoProximoTurno; }
 
-    // ── Reset de turno ─────────────────────────────────────────────────────────
-
     public void resetTurno() {
+        // si estaba bloqueado, aplica el bloqueo este turno y lo consume para que no se repita
         if (bloqueadoProximoTurno) {
-            // Aplica el bloqueo este turno y lo consume
             yaJugoCartaEsteTurno = true;
             bloqueadoProximoTurno = false;
         } else {
@@ -94,13 +86,11 @@ public class Jugador {
         }
     }
 
-    // ── Jugar carta (lógica pura, sin I/O – usada por la GUI) ─────────────────
-
     /**
-     * Intenta jugar la carta en la posición `indice` de la mano.
-     * Para monstruos nivel > 4 se requiere un sacrificio; el índice del
-     * monstruo a sacrificar se pasa en `indiceSacrificio` (-1 = no se necesita).
-     * Retorna true si la carta fue jugada con éxito.
+     * Intenta jugar la carta en la posicion indicada de la mano.
+     * Para monstruos nivel > 4 se requiere un sacrificio; el indice del
+     * monstruo a sacrificar se pasa en indiceSacrificio (-1 si no se necesita).
+     * Retorna true si la carta fue jugada con exito.
      */
     public boolean jugarCarta(int indice, Contexto ctx, int indiceSacrificio) {
         if (indice < 0 || indice >= mano.size()) return false;
@@ -109,11 +99,12 @@ public class Jugador {
         Carta carta = mano.get(indice);
 
         if (carta.getTipo().equals("MONSTRUO")) {
+            // se hace el casteo para poder acceder a los metodos y atributos propios de CartaMonstruo
             CartaMonstruo monstruo = (CartaMonstruo) carta;
 
-            // Sacrificio obligatorio para nivel > 4
+            // los monstruos de nivel mayor a 4 necesitan que se sacrifique uno del campo primero
             if (monstruo.getnivelCarta() > 4) {
-                if (campo.isEmpty()) return false; // no hay qué sacrificar
+                if (campo.isEmpty()) return false;
                 if (indiceSacrificio < 0 || indiceSacrificio >= campo.size()) return false;
                 CartaMonstruo sacrificado = campo.remove(indiceSacrificio);
                 System.out.println(">>> " + nombre + " sacrificó a " + sacrificado.getNombre()
@@ -123,11 +114,14 @@ public class Jugador {
             campo.add(monstruo);
             mano.remove(indice);
             yaJugoCartaEsteTurno = true;
+            // los monstruos invocados en el primer turno no pueden atacar
             monstruo.setPuedeAtacar(!ctx.getCampo().isEsPrimerTurno());
             return true;
 
         } else if (carta.getTipo().equals("MAGICA")) {
+            // se aprovecha que las magicas implementan Activable para poder llamar directamente a activar()
             if (carta instanceof Activable) {
+                // el casteo es necesario para acceder al metodo activar() de la interfaz
                 ((Activable) carta).activar(ctx);
                 mano.remove(indice);
                 yaJugoCartaEsteTurno = true;
@@ -135,7 +129,7 @@ public class Jugador {
             }
 
         } else if (carta.getTipo().equals("TRAMPA")) {
-            // Colocar trampa boca abajo en la zona de trampas
+            // colocar la trampa boca abajo en la zona de trampas, no se activa todavia
             CartaTrampa trampa = (CartaTrampa) carta;
             zonaTrampas.add(trampa);
             mano.remove(indice);
@@ -147,20 +141,18 @@ public class Jugador {
         return false;
     }
 
-    /**
-     * Activa una trampa boca abajo desde la zona de trampas.
-     * Retorna true si se activó con éxito.
-     */
+    // activa una trampa de la zona de trampas, primero verifica si se puede activar en el contexto actual
     public boolean activarTrampa(int indiceTrampa, Contexto ctx) {
         if (indiceTrampa < 0 || indiceTrampa >= zonaTrampas.size()) return false;
         CartaTrampa trampa = zonaTrampas.get(indiceTrampa);
         if (!trampa.puedoActivarme(ctx)) return false;
         trampa.activar(ctx);
+        // se remueve de la zona de trampas porque ya fue usada
         zonaTrampas.remove(indiceTrampa);
         return true;
     }
 
-    /** Verifica si alguna trampa puede activarse en el contexto actual. */
+    // recorre todas las trampas y retorna true si al menos una puede activarse ahora
     public boolean hayTrampaActivable(Contexto ctx) {
         for (CartaTrampa t : zonaTrampas) {
             if (t.puedoActivarme(ctx)) return true;

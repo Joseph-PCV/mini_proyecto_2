@@ -1,14 +1,11 @@
+// agrupa toda la informacion relevante del estado actual del duelo para pasarsela a las cartas al activarse
 public class Contexto {
 
     private Jugador jugActivo;
     private Jugador oponente;
     private CampoBatalla campo;
 
-    /**
-     * Monstruo que está declarando el ataque en este momento.
-     * Solo se asigna durante la fase de respuesta de trampas en accionAtacar().
-     * Null fuera de esa fase.
-     */
+    // solo se asigna durante la fase de respuesta de trampas en un ataque, fuera de ahi es null
     private CartaMonstruo monstruoAtacante;
 
     public Contexto(Jugador jugActivo, Jugador oponente, CampoBatalla campo) {
@@ -34,12 +31,11 @@ public class Contexto {
         return campo.getTurnoActual();
     }
 
-    /** Retorna el monstruo que está atacando. Null si no hay ataque en curso. */
     public CartaMonstruo getMonstruoAtacante() {
         return monstruoAtacante;
     }
 
-    /** Asigna el monstruo atacante. Llamar antes de ofrecer respuesta de trampas. */
+    // se llama antes de ofrecer la respuesta de trampas para que sepan quien esta atacando
     public void setMonstruoAtacante(CartaMonstruo monstruoAtacante) {
         this.monstruoAtacante = monstruoAtacante;
     }
